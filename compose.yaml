@@ -1,0 +1,49 @@
+name: lab09-practice
+
+services:
+  web:
+    build: ./docker/php
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8080}:80"
+    environment:
+      DB_HOST: db
+      DB_NAME: db_lab08
+      DB_USER: webapp_user
+      DB_PASSWORD: ${DB_PASSWORD:-lab09_demo_password}
+    volumes:
+      - ./www:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mariadb:11.4
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-lab09_root_demo}
+      MARIADB_DATABASE: db_lab08
+      MARIADB_USER: webapp_user
+      MARIADB_PASSWORD: ${DB_PASSWORD:-lab09_demo_password}
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./docker/db/01-init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 30s
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  phpmyadmin:
+    image: phpmyadmin:5.2-apache
+    ports:
+      - "127.0.0.1:${PMA_PORT:-8081}:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:
