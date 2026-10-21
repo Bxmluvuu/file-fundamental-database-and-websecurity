@@ -16,5 +16,5 @@ VALUES ('Network Security', 'Alice Brown', 'Security', 480.50, '9780132350884', 
 
 -- The official image creates this account before running this file.
 -- The web app only needs SELECT and INSERT for this exercise.
-REVOKE ALL PRIVILEGES ON db_lab08.* FROM 'webapp_user'@'%';
+REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'webapp_user'@'%';
 GRANT SELECT, INSERT ON db_lab08.books TO 'webapp_user'@'%';
